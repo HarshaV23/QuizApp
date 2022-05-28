@@ -1,5 +1,7 @@
 package com.pocapp.quizapp
 
+import android.graphics.Color
+import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
@@ -8,7 +10,9 @@ import android.widget.Button
 import android.widget.ImageView
 import android.widget.ProgressBar
 import android.widget.TextView
+import androidx.core.content.ContextCompat
 import java.util.*
+import kotlin.collections.ArrayList
 
 class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
 
@@ -41,6 +45,12 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
          option3 = findViewById(R.id.tv_option_three)
          option4 = findViewById(R.id.tv_option_four)
 
+         option1?.setOnClickListener(this)
+         option2?.setOnClickListener(this)
+         option3?.setOnClickListener(this)
+         option4?.setOnClickListener(this)
+         submitButton?.setOnClickListener(this)
+
          mQuestionArrayList = Constants.getQuestions()
          setQuestion()
 
@@ -67,10 +77,70 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
     }
 
     private fun defaultOptionsView(){
+        var options = ArrayList<TextView>()
+        option1?.let {
+            options.add(0,it)
+        }
+
+       option2?.let {
+            options.add(1,it)
+        }
+
+        option3?.let {
+            options.add(2,it)
+        }
+
+        option4?.let {
+            options.add(3,it)
+        }
+
+        for(option in options){
+            option.setTextColor(Color.parseColor("#7A8089"))
+            option.typeface = Typeface.DEFAULT
+            option.background = ContextCompat.getDrawable(
+                this,
+                R.drawable.default_border
+            )
+        }
+    }
+
+    private fun selectedOptionView(tv : TextView, selectedOptionNum : Int){
+        defaultOptionsView()
+        mSelectedOption = selectedOptionNum
+        tv.setTextColor(Color.parseColor("#363a43"))
+        tv.setTypeface(tv.typeface, Typeface.BOLD)
+        tv.background = ContextCompat.getDrawable(
+            this,
+            R.drawable.question_select_border
+        )
 
     }
 
-    override fun onClick(p0: View?) {
-
+    override fun onClick(view : View?) {
+        when(view?.id){
+            R.id.tv_option_one ->{
+                option1?.let {
+                    selectedOptionView(it,1)
+                }
+            }
+            R.id.tv_option_two ->{
+                option2?.let {
+                    selectedOptionView(it,2)
+                }
+            }
+            R.id.tv_option_three ->{
+                option3?.let {
+                    selectedOptionView(it,3)
+                }
+            }
+            R.id.tv_option_four ->{
+                option4?.let {
+                    selectedOptionView(it,4)
+                }
+            }
+            R.id.submitButton ->{
+                // TODO implement the submit button
+            }
+        }
     }
 }

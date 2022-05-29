@@ -1,15 +1,13 @@
 package com.pocapp.quizapp
 
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import android.widget.ProgressBar
-import android.widget.TextView
+import android.widget.*
 import androidx.core.content.ContextCompat
 import java.util.*
 import kotlin.collections.ArrayList
@@ -19,6 +17,9 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
    private var mCurrentPosition : Int = 1
    private var mQuestionArrayList : ArrayList<Question>? = null
    private var mSelectedOption : Int = 0
+   private var mPlayerName : String? = null
+   private var mCorrectAnwers : Int? = null
+
 
    private var progressBar : ProgressBar? = null
    private var tvProgressBar : TextView? = null
@@ -34,6 +35,7 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
      override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_quiz_questions)
+         mPlayerName = intent.getStringExtra(Constants.USER_NAME)
 
          progressBar = findViewById(R.id.progressBar)
          tvProgressBar = findViewById(R.id.tvProgressBar)
@@ -52,17 +54,18 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
          submitButton?.setOnClickListener(this)
 
          mQuestionArrayList = Constants.getQuestions()
+         mCorrectAnwers = mQuestionArrayList!!.size
          setQuestion()
 
 
      }
 
     private fun setQuestion() {
-
+        defaultOptionsView()
         val question: Question = mQuestionArrayList!![mCurrentPosition - 1]
         progressBar?.progress = mCurrentPosition
         tvProgressBar?.text = "$mCurrentPosition/${progressBar?.max}"
-        iVQuestionFlag?.setImageResource(R.drawable.ic_flag_of_argentina)
+        iVQuestionFlag?.setImageResource(question?.image)
         tvQuestion?.text = question.question
         option1?.text = question.optionOne
         option2?.text = question.optionTwo
@@ -139,7 +142,67 @@ class QuizQuestionsActivity : AppCompatActivity(), View.OnClickListener {
                 }
             }
             R.id.submitButton ->{
-                // TODO implement the submit button
+                if(mSelectedOption == 0){
+                    mCurrentPosition++
+
+                    when{
+                        mCurrentPosition <= mQuestionArrayList!!.size -> {
+                            setQuestion()
+                        }else->{
+                            var intent = Intent(this,Result_Activity::class.java)
+                            intent.putExtra(Constants.USER_NAME,mPlayerName)
+                            intent.putExtra(Constants.TOTAL_QUESTIONS,mQuestionArrayList?.size)
+                            intent.putExtra(Constants.CORRECT_ANSWERS, mCorrectAnwers)
+                            startActivity(intent)
+                            finish()
+                        }
+                    }
+                }else{
+                    val question = mQuestionArrayList?.get(mCurrentPosition-1)
+                    if(question!!.correctAnswer != mSelectedOption){
+                        answerView(mSelectedOption,R.drawable.wrong_answer_border)
+                        mCorrectAnwers= mCorrectAnwers?.minus(1)
+                    }
+                    answerView(question.correctAnswer, R.drawable.correct_answer_border)
+
+                    if(mCurrentPosition == mQuestionArrayList!!.size){
+                        submitButton?.text = "Finish!"
+                    }else{
+                        submitButton?.text = "Go to next Question!!"
+                    }
+
+                    mSelectedOption = 0
+                }
+
+            }
+        }
+    }
+
+    private fun answerView(answer : Int, drawableView : Int){
+        when(answer){
+            1 -> {
+                option1?.background = ContextCompat.getDrawable(
+                    this,
+                    drawableView
+                )
+            }
+            2 -> {
+                option2?.background = ContextCompat.getDrawable(
+                    this,
+                    drawableView
+                )
+            }
+            3 -> {
+                option3?.background = ContextCompat.getDrawable(
+                    this,
+                    drawableView
+                )
+            }
+            4 -> {
+                option4?.background = ContextCompat.getDrawable(
+                    this,
+                    drawableView
+                )
             }
         }
     }
